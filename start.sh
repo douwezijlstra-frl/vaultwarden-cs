@@ -1,5 +1,27 @@
 #!/bin/sh
-export DATABASE_URL="mysql://[${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}"
+export DATABASE_URL="mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}"
+
+wait_for_db() {
+  counter=0
+  echo >&2 "Connecting to database at $DB_HOST"
+  while ! mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD -e "USE mysql;" >/dev/null; do
+    counter=$((counter+1))
+    if [ $counter == 30 ]; then
+      echo >&2 "Error: Couldn't connect to database."
+      exit 1
+    fi
+    echo >&2 "Trying to connect to database at $DB_HOST. Attempt $counter..."
+    sleep 5
+  done
+}
+
+setup_db() {
+  echo >&2 "Creating the database if it does not exist..."
+  mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD --skip-column-names -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+}
+
+wait_for_db
+setup_db
 
 if [ -r /etc/vaultwarden.sh ]; then
     . /etc/vaultwarden.sh
