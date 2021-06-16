@@ -23,7 +23,6 @@ services:
       DB_USER: root
       DB_PASSWORD: "test4pwd3s"
       DB_NAME: vaultwarden
-      WEBSOCKET_ENABLED: "true"
 volumes:
   db_data: {}
   vw_data: {}
